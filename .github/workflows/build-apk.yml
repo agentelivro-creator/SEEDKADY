@@ -24,6 +24,10 @@ jobs:
         run: npm install
 
       - name: Criar projeto Android
+            - name: Preparar pasta www
+        run: |
+          mkdir -p www
+          [ -f www/index.html ] || cp index.html www/index.html
         run: npx cap add android
 
       - name: Gerar icones do app
