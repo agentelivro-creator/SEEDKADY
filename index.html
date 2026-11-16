@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KADYSEED — Editor de Fotos Pro</title>
+<style>
+:root{--bg:#f2f2f6;--panel:#fff;--ink:#16161d;--mut:#6d6d7d;--line:#e2e2ea;--stage:#e7e7ee;--chip:#efeff5;--acc:#6c4cff;--acc2:#ff4f9a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c0d12;--panel:#15161d;--ink:#f1f1f6;--mut:#8b8b9c;--line:#262733;--stage:#0a0a0e;--chip:#1f2029}}
+:root[data-theme="dark"]{--bg:#0c0d12;--panel:#15161d;--ink:#f1f1f6;--mut:#8b8b9c;--line:#262733;--stage:#0a0a0e;--chip:#1f2029}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{margin-right:auto;line-height:1.15}.logo span{font-weight:800;font-size:17px;letter-spacing:-.3px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}.logo small{display:block;font-size:10px;color:var(--mut);letter-spacing:.2px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#16161d;color:#fff;padding:11px 18px;border-radius:24px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90%;text-align:center}.toast.on{opacity:1;transform:translate(-50%,0)}.credit{text-align:center;color:var(--mut);font-size:11px;margin-top:18px}
+button{font:inherit;color:inherit;cursor:pointer}
+.ib{border:1px solid var(--line);background:var(--chip);border-radius:10px;min-width:38px;height:38px;padding:0 10px;font-size:16px}
+.ib:disabled{opacity:.35}
+.pri{border:0;color:#fff;background:linear-gradient(90deg,var(--acc),var(--acc2));font-weight:700;border-radius:10px;height:38px;padding:0 16px}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative;background:var(--stage);display:flex;align-items:center;justify-content:center;padding:10px}
+#cv{width:100%;height:100%;object-fit:contain;display:none;filter:drop-shadow(0 8px 30px rgba(0,0,0,.35))}
+#hist{position:absolute;right:14px;top:14px;width:110px;height:48px;border-radius:8px;background:rgba(0,0,0,.45);display:none;backdrop-filter:blur(6px)}
+#cmp{position:absolute;left:14px;bottom:14px;display:none;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600;user-select:none;touch-action:none}
+.empty{text-align:center;max-width:320px;border:2px dashed var(--line);border-radius:20px;padding:32px 20px}
+.empty h2{margin:0 0 6px;font-size:20px}.empty p{color:var(--mut);margin:0 0 18px}
+.empty .ib{margin-top:8px}
+.panel{background:var(--panel);border-top:1px solid var(--line)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:transparent;color:var(--mut);padding:8px 14px;border-radius:20px;font-weight:600}
+.tab.on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff}
+.body{max-height:34vh;overflow-y:auto;padding:4px 16px 16px}
+.pg{display:none}.pg.on{display:block}
+.row{margin:10px 0}
+.row label{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;font-weight:600;margin-bottom:2px}
+.row output{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--acc);height:28px}
+input[type=text],select{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:0 12px;font:inherit}
+input[type=color]{width:100%;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--chip);padding:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:9px 13px;font-weight:600}
+.chip.on{border-color:var(--acc);color:var(--acc)}
+.flt{display:flex;flex-wrap:wrap;gap:12px 10px;padding:8px 0}
+.flt button{flex:none;width:74px;border:0;background:none;color:var(--mut);font-size:11px;font-weight:600;text-align:center;padding:0}
+.flt canvas{display:block;width:74px;height:74px;border-radius:12px;margin-bottom:4px;border:2px solid transparent}
+.flt button.on canvas{border-color:var(--acc)}.flt button.on{color:var(--ink)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px;z-index:9;text-align:center;color:#fff}
+.modal.on{display:flex}.modal img{max-width:100%;max-height:62vh;border-radius:12px}
+.modal a{text-decoration:none;display:inline-flex;align-items:center}
+@media (min-width:900px){
+ main{flex-direction:row}
+ .panel{width:360px;border-top:0;border-left:1px solid var(--line);display:flex;flex-direction:column;order:2}
+ .tabs{flex-wrap:wrap;overflow:visible}.body{max-height:none;flex:1}
+ .stage{padding:24px}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo"><span>◐ KADYSEED</span><small>desenvolvido por Josimar</small></div>
+ <button class="ib" id="undo" title="Desfazer" disabled>↶</button>
+ <button class="ib" id="redo" title="Refazer" disabled>↷</button>
+ <button class="ib" id="reset" title="Restaurar tudo" disabled>⟲</button>
+ <button class="ib" id="open" title="Abrir foto">＋</button>
+ <button class="pri" id="expTop">Salvar</button>
+</header>
+<main>
+ <div class="stage" id="stage">
+  <div class="empty" id="empty">
+   <h2>Edite como um profissional</h2>
+   <p>Arraste uma foto aqui ou escolha da galeria. Tudo é processado no seu aparelho.</p>
+   <button class="pri" id="open2">Abrir foto</button><br>
+   <button class="ib" id="demo">Usar foto de exemplo</button>
+   <p class="credit">desenvolvido por Josimar</p>
+  </div>
+  <canvas id="cv"></canvas><canvas id="hist" width="110" height="48"></canvas>
+  <button id="cmp">Segure para comparar</button>
+ </div>
+ <section class="panel">
+  <div class="tabs" id="tabs"></div>
+  <div class="body" id="body"></div>
+ </section>
+</main>
+<div class="modal" id="modal">
+ <img id="mimg" alt="Foto exportada">
+ <div>Toque e segure a imagem para salvar, ou use o botão.</div>
+ <div style="display:flex;gap:10px"><a class="pri" id="mdl" href="#">Baixar</a><button class="ib" id="mx">Fechar</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<script>
+const $=q=>document.querySelector(q);
+const ADJ=['exp','bri','con','hil','sha','sat','vib','tem','tin','fade','vig','gra','shp','bw','sep'];
+const DEF={exp:0,bri:0,con:0,hil:0,sha:0,sat:0,vib:0,tem:0,tin:0,fade:0,vig:0,gra:0,shp:0,bw:0,sep:0,rot:0,ang:0,fh:0,fv:0,crop:'',text:'',tsize:8,tcolor:'#ffffff',tx:50,ty:85,bor:0,bcol:'#ffffff'};
+const POS=['fade','vig','gra','shp','bw','sep','bor'];
+const G={Luz:[['exp','Exposição'],['bri','Brilho'],['con','Contraste'],['hil','Realces'],['sha','Sombras']],
+Cor:[['sat','Saturação'],['vib','Vibração'],['tem','Temperatura'],['tin','Matiz (verde/magenta)']],
+Efeitos:[['fade','Esmaecer'],['vig','Vinheta'],['gra','Granulação'],['shp','Nitidez'],['bw','Preto e branco'],['sep','Sépia']]};
+const PRE={Original:{},'Vívido':{sat:30,con:15,vib:25},Cinema:{con:20,tem:-15,tin:5,sha:15,vig:30,sat:-10,fade:10},'Teal & Orange':{con:25,sat:20,tem:18,tin:-8,hil:-15,sha:10,vig:30,shp:20},Blockbuster:{con:35,sat:10,tem:-10,hil:-25,sha:20,vig:35,shp:30,exp:-5},'Épico':{con:30,sat:20,vib:20,hil:-30,sha:25,shp:35,vig:25,tem:8},Thriller:{con:30,sat:-35,tem:-25,exp:-12,vig:45,gra:15,fade:8},'Filme 35mm':{gra:45,fade:20,tem:12,sat:-8,con:8,vig:20},'Ficção Científica':{tem:-40,tin:-10,con:25,sat:-5,vig:35,exp:-8,shp:20},Western:{sep:35,tem:35,con:20,fade:12,vig:40,gra:25,sat:10},'Anos 80':{tem:-10,tin:25,sat:35,fade:15,con:15,gra:20,bri:5},Vintage:{sep:40,fade:25,vig:35,gra:30,tem:20,con:-5},'P&B':{bw:100,con:20},Noir:{bw:100,con:50,vig:50,exp:-10,gra:20},Quente:{tem:35,sat:10},Frio:{tem:-35,sat:5},'Dramático':{con:40,hil:-30,sha:30,sat:-15,vig:25,shp:30},Suave:{con:-15,fade:20,bri:8,sat:-10},'Pôr do sol':{tem:40,tin:15,sat:25,vig:20},Matte:{fade:35,con:-10,sat:-15}};
+let s={...DEF},src=null,hist=[],hi=-1,orig=false,pend=0;
+
+function rng(k,l,min,max){return `<div class="row"><label><span>${l}</span><output id="o_${k}">0</output></label><input type="range" data-k="${k}" min="${min}" max="${max}" value="0" step="1"></div>`}
+function build(){
+ const pages={};
+ for(const g in G)pages[g]=G[g].map(([k,l])=>rng(k,l,POS.includes(k)?0:-100,POS.includes(k)?100:100)).join('');
+ pages.Filtros='<div class="flt" id="flt"></div><div class="row"><label><span>Intensidade do filtro</span><output id="o_fi">100</output></label><input type="range" id="fi" min="0" max="100" value="100"></div>';
+ pages.Cortar=`<div class="chips" id="crops">${['','1:1','4:5','4:3','3:2','16:9','9:16'].map(c=>`<button class="chip" data-c="${c}">${c||'Livre'}</button>`).join('')}</div>
+ <div class="chips"><button class="chip" id="rl">⟲ 90°</button><button class="chip" id="rr">⟳ 90°</button><button class="chip" id="fh">⇋ Espelhar</button><button class="chip" id="fv">⇅ Inverter</button></div>${rng('ang','Endireitar (°)',-45,45)}`;
+ pages.Texto=`<div class="row"><input type="text" data-k="text" placeholder="Digite um texto na foto"></div>${rng('tsize','Tamanho',2,30)}${rng('tx','Posição horizontal',0,100)}${rng('ty','Posição vertical',0,100)}<div class="row"><label><span>Cor do texto</span></label><input type="color" data-k="tcolor" value="#ffffff"></div>
+ <div style="height:8px"></div>${rng('bor','Moldura',0,12)}<div class="row"><label><span>Cor da moldura</span></label><input type="color" data-k="bcol" value="#ffffff"></div>`;
+ pages.Exportar=`<div class="row"><label><span>Formato</span></label><select id="fmt"><option value="image/jpeg">JPEG</option><option value="image/png">PNG (sem perdas)</option><option value="image/webp">WebP</option></select></div>
+ <div class="row"><label><span>Qualidade</span><output id="o_q">92</output></label><input type="range" id="qual" min="40" max="100" value="92"></div><button class="pri" id="sv" style="width:100%;margin-top:8px">Salvar na galeria</button><button class="chip" id="exp" style="width:100%;margin-top:10px">Exportar / baixar arquivo</button><p class="credit">KADYSEED • desenvolvido por Josimar</p>`;
+ let t='',b='';
+ Object.keys(pages).forEach((n,i)=>{t+=`<button class="tab${i?'':' on'}" data-t="${n}">${n}</button>`;b+=`<div class="pg${i?'':' on'}" id="pg_${n}">${pages[n]}</div>`});
+ $('#tabs').innerHTML=t;$('#body').innerHTML=b;
+ $('#tabs').onclick=e=>{const n=e.target.dataset.t;if(!n)return;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===e.target));document.querySelectorAll('.pg').forEach(x=>x.classList.toggle('on',x.id==='pg_'+n))};
+ document.querySelectorAll('[data-k]').forEach(el=>{
+  el.addEventListener('input',()=>{const k=el.dataset.k;s[k]=el.type==='range'?+el.value:el.value;const o=$('#o_'+k);if(o)o.textContent=el.value;draw()});
+  el.addEventListener('change',commit);
+  if(el.type==='range')el.addEventListener('dblclick',()=>{el.value=DEF[el.dataset.k];el.dispatchEvent(new Event('input'));commit()});
+ });
+ $('#qual').oninput=e=>$('#o_q').textContent=e.target.value;
+ $('#crops').onclick=e=>{const c=e.target.dataset.c;if(c===undefined)return;s.crop=c;sync();draw();commit()};
+ $('#rl').onclick=()=>{s.rot=(s.rot+3)%4;draw();commit()};
+ $('#rr').onclick=()=>{s.rot=(s.rot+1)%4;draw();commit()};
+ $('#fh').onclick=()=>{s.fh^=1;draw();commit()};
+ $('#fv').onclick=()=>{s.fv^=1;draw();commit()};
+ $('#exp').onclick=exportImg;$('#sv').onclick=()=>saveGallery();
+ let cur='Original';
+ $('#fi').oninput=e=>{$('#o_fi').textContent=e.target.value;applyPre(cur,e.target.value/100,false)};
+ $('#fi').onchange=commit;
+ window.applyPre=(n,f,c=true)=>{cur=n;ADJ.forEach(k=>s[k]=Math.round((PRE[n][k]||0)*f));sync();draw();if(c)commit();document.querySelectorAll('#flt button').forEach(x=>x.classList.toggle('on',x.dataset.n===n))};
+}
+function sync(){
+ document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;el.value=s[k];const o=$('#o_'+k);if(o)o.textContent=s[k]});
+ document.querySelectorAll('#crops .chip').forEach(c=>c.classList.toggle('on',c.dataset.c===s.crop));
+}
+function commit(){
+ hist=hist.slice(0,hi+1);const j=JSON.stringify(s);if(hist[hi]===j)return;hist.push(j);hi++;btns();
+}
+function btns(){$('#undo').disabled=hi<1;$('#redo').disabled=hi>=hist.length-1;$('#reset').disabled=!src}
+function go(i){hi=i;s=JSON.parse(hist[hi]);sync();draw();btns()}
+$('#undo').onclick=()=>hi>0&&go(hi-1);
+$('#redo').onclick=()=>hi<hist.length-1&&go(hi+1);
+$('#reset').onclick=()=>{s={...DEF};sync();draw();commit()};
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();e.shiftKey?$('#redo').click():$('#undo').click()}});
+
+function render(sc,max,st){
+ const q=st.rot%2;let w0=q?sc.height:sc.width,h0=q?sc.width:sc.height;
+ const k=Math.min(1,max/Math.max(w0,h0)),w=Math.round(w0*k),h=Math.round(h0*k);
+ let c=document.createElement('canvas');c.width=w;c.height=h;let x=c.getContext('2d');
+ const a=st.ang*Math.PI/180,z=Math.abs(Math.cos(a))+Math.abs(Math.sin(a))*Math.max(w/h,h/w);
+ x.imageSmoothingQuality='high';x.translate(w/2,h/2);x.rotate(a);x.scale(z*(st.fh?-1:1),z*(st.fv?-1:1));x.rotate(st.rot*Math.PI/2);
+ const dw=sc.width*k,dh=sc.height*k;x.drawImage(sc,-dw/2,-dh/2,dw,dh);
+ if(st.crop){const[r1,r2]=st.crop.split(':').map(Number),R=r1/r2;let cw=w,ch=h;if(w/h>R)cw=h*R;else ch=w/R;cw=Math.round(cw);ch=Math.round(ch);
+  const c2=document.createElement('canvas');c2.width=cw;c2.height=ch;c2.getContext('2d').drawImage(c,(w-cw)/2,(h-ch)/2,cw,ch,0,0,cw,ch);c=c2;x=c.getContext('2d')}
+ const W=c.width,H=c.height;
+ if(ADJ.some(k=>st[k])){
+  const im=x.getImageData(0,0,W,H),d=im.data,m=Math.pow(2,st.exp/100*1.5),br=st.bri*1.27,cf=1+st.con/100,tm=st.tem*.5,tn=st.tin,hl=st.hil*.4,sh=st.sha*.4,sv=1+st.sat/100,vb=st.vib/100,bw=st.bw/100,sp=st.sep/100,fd=st.fade/100*.3,vg=st.vig/100,gr=st.gra*1.2;
+  let p=0;
+  for(let y=0;y<H;y++){const dy=(y/H-.5)*2;
+   for(let xx=0;xx<W;xx++,p+=4){
+    let r=d[p]*m+br,g=d[p+1]*m+br,b=d[p+2]*m+br;
+    r=(r-128)*cf+128;g=(g-128)*cf+128;b=(b-128)*cf+128;
+    r+=tm+tn*.15;b+=-tm+tn*.15;g-=tn*.4;
+    let l=.299*r+.587*g+.114*b;
+    const wh=Math.min(1,Math.max(0,(l-128)/127)),ws=Math.min(1,Math.max(0,(128-l)/128)),ad=hl*wh+sh*ws;
+    r+=ad;g+=ad;b+=ad;l=.299*r+.587*g+.114*b;
+    const mx=Math.max(r,g,b),mn=Math.min(r,g,b),t=sv*(1+vb*(1-(mx-mn)/255));
+    r=l+(r-l)*t;g=l+(g-l)*t;b=l+(b-l)*t;
+    if(bw){r+=(l-r)*bw;g+=(l-g)*bw;b+=(l-b)*bw}
+    if(sp){const sr=.393*r+.769*g+.189*b,sg=.349*r+.686*g+.168*b,sb=.272*r+.534*g+.131*b;r+=(sr-r)*sp;g+=(sg-g)*sp;b+=(sb-b)*sp}
+    if(fd){r=r*(1-fd)+70*fd;g=g*(1-fd)+70*fd;b=b*(1-fd)+70*fd}
+    if(vg){const dx=(xx/W-.5)*2,v=1-vg*((dx*dx+dy*dy)/2)*1.5;r*=v;g*=v;b*=v}
+    if(gr){const n=(Math.random()-.5)*gr;r+=n;g+=n;b+=n}
+    d[p]=r;d[p+1]=g;d[p+2]=b;
+   }}
+  if(st.shp){const o=new Uint8ClampedArray(d),a2=st.shp/100*1.2,s4=W*4;
+   for(let y=1;y<H-1;y++)for(let xx=1;xx<W-1;xx++){const i=(y*W+xx)*4;for(let ch=0;ch<3;ch++){const j=i+ch;d[j]=o[j]+a2*(4*o[j]-o[j-4]-o[j+4]-o[j-s4]-o[j+s4])}}}
+  x.putImageData(im,0,0);
+ }
+ if(st.text){const fs=st.tsize/100*H;x.font=`800 ${fs}px system-ui,-apple-system,sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillStyle=st.tcolor;x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=fs*.15;x.fillText(st.text,st.tx/100*W,st.ty/100*H);x.shadowBlur=0}
+ if(st.bor){const t=st.bor/100*Math.min(W,H);x.fillStyle=st.bcol;x.fillRect(0,0,W,t);x.fillRect(0,H-t,W,t);x.fillRect(0,0,t,H);x.fillRect(W-t,0,t,H)}
+ return c;
+}
+function draw(){if(pend)return;pend=requestAnimationFrame(()=>{pend=0;if(!src)return;
+ const st=orig?{...DEF,rot:s.rot,ang:s.ang,fh:s.fh,fv:s.fv,crop:s.crop}:s,p=render(src,1400,st),cv=$('#cv');
+ cv.width=p.width;cv.height=p.height;cv.getContext('2d').drawImage(p,0,0);histo(p)})}
+function histo(p){
+ const t=document.createElement('canvas');t.width=64;t.height=Math.max(1,Math.round(64*p.height/p.width));const tx=t.getContext('2d');tx.drawImage(p,0,0,t.width,t.height);
+ const d=tx.getImageData(0,0,t.width,t.height).data,B=[new Array(32).fill(0),new Array(32).fill(0),new Array(32).fill(0)];
+ for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++)B[c][d[i+c]>>3]++;
+ const mx=Math.max(...B.flat()),h=$('#hist').getContext('2d');h.clearRect(0,0,110,48);h.globalCompositeOperation='lighter';
+ ['#ff3b3b','#3bff6a','#3b7bff'].forEach((col,c)=>{h.fillStyle=col+'aa';B[c].forEach((v,i)=>{const bh=v/mx*46;h.fillRect(i*3.4,48-bh,3.4,bh)})});
+}
+function setSrc(img){
+ const k=Math.min(1,4000/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+ src=c;s={...DEF};hist=[];hi=-1;sync();commit();
+ $('#empty').style.display='none';['#cv','#hist','#cmp'].forEach(q=>$(q).style.display=q==='#cv'?'block':'block');
+ const f=$('#flt');f.innerHTML='';
+ for(const n in PRE){const b=document.createElement('button');b.dataset.n=n;const t=render(c,90,{...DEF,...PRE[n],crop:'1:1'});b.appendChild(t);b.append(n);b.onclick=()=>{$('#fi').value=100;$('#o_fi').textContent=100;applyPre(n,1)};f.appendChild(b)}
+ f.firstChild.classList.add('on');draw();btns();
+}
+function loadFile(f){if(!f||!f.type.startsWith('image/'))return;const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{setSrc(i);URL.revokeObjectURL(u)};i.src=u}
+$('#file').onchange=e=>loadFile(e.target.files[0]);
+['#open','#open2'].forEach(q=>$(q).onclick=()=>$('#file').click());
+$('#stage').ondragover=e=>e.preventDefault();
+$('#stage').ondrop=e=>{e.preventDefault();loadFile(e.dataTransfer.files[0])};
+$('#demo').onclick=()=>{
+ const c=document.createElement('canvas');c.width=1200;c.height=800;const x=c.getContext('2d');
+ let g=x.createLinearGradient(0,0,0,800);g.addColorStop(0,'#1c2b5a');g.addColorStop(.5,'#e8734a');g.addColorStop(.7,'#ffc46b');g.addColorStop(1,'#2a3a5c');x.fillStyle=g;x.fillRect(0,0,1200,800);
+ x.fillStyle='#fff3c4';x.beginPath();x.arc(820,430,70,0,7);x.fill();
+ [['#3b2a48',.55,90],['#241a35',.65,140],['#150f22',.75,60]].forEach(([col,yy,a],i)=>{x.fillStyle=col;x.beginPath();x.moveTo(0,800);for(let X=0;X<=1200;X+=40)x.lineTo(X,800*yy+Math.sin(X/130+i*2)*a);x.lineTo(1200,800);x.fill()});
+ const i=new Image();i.onload=()=>setSrc(i);i.src=c.toDataURL();
+};
+const cm=$('#cmp');['pointerdown'].forEach(v=>cm.addEventListener(v,e=>{orig=true;draw()}));
+['pointerup','pointerleave','pointercancel'].forEach(v=>cm.addEventListener(v,()=>{if(orig){orig=false;draw()}}));
+function exportImg(){
+ if(!src)return;const f=$('#fmt').value,c=render(src,4096,s);
+ c.toBlob(b=>{const u=URL.createObjectURL(b);$('#mimg').src=u;const a=$('#mdl');a.href=u;a.download='foto-editada.'+(f==='image/jpeg'?'jpg':f==='image/webp'?'webp':'png');$('#modal').classList.add('on')},f,$('#qual').value/100);
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2800)}
+async function saveGallery(){
+ if(!src){$('#file').click();return}
+ const f=$('#fmt').value,url=render(src,4096,s).toDataURL(f,$('#qual').value/100),M=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Media;
+ if(!M){exportImg();return}
+ try{
+  let al=null;const find=async()=>((await M.getAlbums()).albums||[]).find(a=>a.name==='KADYSEED');
+  try{al=await find();if(!al){await M.createAlbum({name:'KADYSEED'});al=await find()}}catch(e){}
+  const o={path:url,fileName:'kadyseed-'+Date.now()};if(al)o.albumIdentifier=al.identifier;
+  await M.savePhoto(o);toast('Foto salva na galeria!');
+ }catch(e){toast('Não foi possível salvar: '+((e&&(e.message||e.code))||e))}
+}
+$('#expTop').onclick=()=>saveGallery();
+$('#mx').onclick=()=>$('#modal').classList.remove('on');
+build();
+</script>
+</body>
+</html>
