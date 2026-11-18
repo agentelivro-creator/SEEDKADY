@@ -72,7 +72,6 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 </style>
 </head>
 <body>
-<script>window.onerror=function(m,u,l){document.body.insertAdjacentHTML('afterbegin','<pre style="position:fixed;z-index:99;top:0;left:0;right:0;margin:0;padding:10px;background:#900;color:#fff;font-size:12px;white-space:pre-wrap">Erro: '+m+' (linha '+l+')</pre>')}</script>
 <header>
  <div class="logo"><img class="lg" alt=""><div><span>KADYSEED</span><small>desenvolvido por Josimar</small></div></div>
  <button class="ib" id="undo" title="Desfazer" disabled>↶</button>
@@ -120,18 +119,18 @@ Object.assign(G,{'Níveis':[['pb','Ponto preto'],['pw','Ponto branco'],['gam','G
 const RNG={sth:[0,360],hih:[0,360]},mm=k=>RNG[k]||(POS.includes(k)?[0,100]:[-100,100]);
 let s={...DEF},src=null,hist=[],hi=-1,orig=false,pend=0;
 
-function rng(k,l,min,max){return `<div class="row"><label><span>${l}</span><output id="o_${k}">0</output></label><input type="range" data-k="${k}" min="${min}" max="${max}" value="0" step="1"></div>`}
+function rng(k,l,min,max){return `<div class="row"><label><span>${l}</span><output id="o_${k}">0</o></label><input type="range" data-k="${k}" min="${min}" max="${max}" value="0" step="1"></div>`}
 function build(){
  const pages={};
  for(const g in G)pages[g]=G[g].map(([k,l])=>rng(k,l,...mm(k))).join('');
  pages.Luz='<button class="chip" id="auto" style="width:100%;margin-top:8px">Melhoria automática</button>'+pages.Luz;
- pages.Filtros='<div class="flt" id="flt"></div><div class="row"><label><span>Intensidade do filtro</span><output id="o_fi">100</output></label><input type="range" id="fi" min="0" max="100" value="100"></div><div class="row" style="margin-top:18px"><label><span>Meus estilos</span></label><input type="text" id="cn" placeholder="Nome do estilo"></div><button class="chip" id="cs" style="width:100%">Salvar ajustes atuais como estilo</button><div class="flt" id="mine"></div>';
+ pages.Filtros='<div class="flt" id="flt"></div><div class="row"><label><span>Intensidade do filtro</span><output id="o_fi">100</o></label><input type="range" id="fi" min="0" max="100" value="100"></div><div class="row" style="margin-top:18px"><label><span>Meus estilos</span></label><input type="text" id="cn" placeholder="Nome do estilo"></div><button class="chip" id="cs" style="width:100%">Salvar ajustes atuais como estilo</button><div class="flt" id="mine"></div>';
  pages.Cortar=`<div class="chips" id="crops">${['','1:1','4:5','4:3','3:2','16:9','9:16'].map(c=>`<button class="chip" data-c="${c}">${c||'Livre'}</button>`).join('')}</div>
  <div class="chips"><button class="chip" id="rl">⟲ 90°</button><button class="chip" id="rr">⟳ 90°</button><button class="chip" id="fh">⇋ Espelhar</button><button class="chip" id="fv">⇅ Inverter</button></div>${rng('ang','Endireitar (°)',-45,45)}${rng('cz','Zoom do recorte (%)',100,400)}${rng('cx','Mover recorte ←→',-100,100)}${rng('cy','Mover recorte ↑↓',-100,100)}`;
  pages.Texto=`<div class="row"><input type="text" data-k="text" placeholder="Digite um texto na foto"></div><div class="row"><select data-k="tfont"><option value="system-ui">Moderna</option><option value="Georgia,serif">Elegante</option><option value="Impact,sans-serif">Impacto</option><option value="Courier New,monospace">Máquina de escrever</option><option value="Brush Script MT,cursive">Manuscrita</option></select></div>${rng('tsize','Tamanho',2,30)}${rng('tx','Posição horizontal',0,100)}${rng('ty','Posição vertical',0,100)}<div class="row"><label><span>Cor do texto</span></label><input type="color" data-k="tcolor" value="#ffffff"></div>
  <div style="height:8px"></div>${rng('bor','Moldura',0,12)}<div class="row"><label><span>Cor da moldura</span></label><input type="color" data-k="bcol" value="#ffffff"></div>`;
  pages.Exportar=`<div class="row"><label><span>Formato</span></label><select id="fmt"><option value="image/jpeg">JPEG</option><option value="image/png">PNG (sem perdas)</option><option value="image/webp">WebP</option></select></div>
- <div class="row"><label><span>Tamanho</span></label><select id="esz"><option value="4096">Máximo (4096 px)</option><option value="2048">Grande (2048 px)</option><option value="1080">Redes sociais (1080 px)</option></select></div><div class="row"><label><span>Qualidade</span><output id="o_q">92</output></label><input type="range" id="qual" min="40" max="100" value="92"></div><button class="pri" id="sv" style="width:100%;margin-top:8px">Salvar na galeria</button><button class="chip" id="exp" style="width:100%;margin-top:10px">Exportar / baixar arquivo</button><p class="credit">KADYSEED • desenvolvido por Josimar</p>`;
+ <div class="row"><label><span>Tamanho</span></label><select id="esz"><option value="4096">Máximo (4096 px)</option><option value="2048">Grande (2048 px)</option><option value="1080">Redes sociais (1080 px)</option></select></div><div class="row"><label><span>Qualidade</span><output id="o_q">92</o></label><input type="range" id="qual" min="40" max="100" value="92"></div><button class="pri" id="sv" style="width:100%;margin-top:8px">Salvar na galeria</button><button class="chip" id="exp" style="width:100%;margin-top:10px">Exportar / baixar arquivo</button><p class="credit">KADYSEED • desenvolvido por Josimar</p>`;
  let t='',b='';
  Object.keys(pages).forEach((n,i)=>{t+=`<button class="tab${i?'':' on'}" data-t="${n}">${n}</button>`;b+=`<div class="pg${i?'':' on'}" id="pg_${n}">${pages[n]}</div>`});
  $('#tabs').innerHTML=t;$('#body').innerHTML=b;
@@ -151,7 +150,7 @@ function build(){
  let cur='Original';
  $('#fi').oninput=e=>{$('#o_fi').textContent=e.target.value;applyPre(cur,e.target.value/100,false)};
  $('#fi').onchange=commit;
- window.applyPre=(n,f,c=true)=>{cur=n;ADJ.concat(['sth','hih']).forEach(k=>s[k]=(k=='sth'||k=='hih')?(PRE[n][k]??DEF[k]):Math.round((PRE[n][k]||0)*f));sync();draw();if(c)commit();document.querySelectorAll('#flt button').forEach(x=>x.classList.toggle('on',x.dataset.n===n))};
+ window.applyPre=(n,f,c=true)=>{cur=n;ADJ.concat(['sth','hih']).forEach(k=>s[k]=(k=='sth'||k=='hih')?(PRE[n][k]!==undefined?PRE[n][k]:DEF[k]):Math.round((PRE[n][k]||0)*f));sync();draw();if(c)commit();document.querySelectorAll('#flt button').forEach(x=>x.classList.toggle('on',x.dataset.n===n))};
 }
 function sync(){
  document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;el.value=s[k];const o=$('#o_'+k);if(o)o.textContent=s[k]});
@@ -181,4 +180,6 @@ function render(sc,max,st){
  if(st.blur)dn(1+st.blur/6,true);
  if(st.pix)dn(2+st.pix/100*Math.min(W,H)/10,false);
  if(ADJ.some(k=>st[k])){
-  const im=x.getImageData(0,0,W,H),d=im.data,m=Math.pow(2,st.exp/100*1.5),br=st.bri*1.27,cf=1+st.con/100,tm=st.tem*.5,tn=st.tin,hl=st.hil*.4,sh=st.sha*.4,sv=1+st.sat/100,vb=st.vib/100,bw=st.bw/100,sp=st.sep/100,fd=st.fade/100*.3,vg=st
+  const im=x.getImageData(0,0,W,H),d=im.data,m=Math.pow(2,st.exp/100*1.5),br=st.bri*1.27,cf=1+st.con/100,tm=st.tem*.5,tn=st.tin,hl=st.hil*.4,sh=st.sha*.4,sv=1+st.sat/100,vb=st.vib/100,bw=st.bw/100,sp=st.sep/100,fd=st.fade/100*.3,vg=st.vig/100,gr=st.gra*1.2,hu=st.hue*1.8*Math.PI/180,cs=Math.cos(hu),sn=Math.sin(hu);
+  const hc=h=>{const f=n=>{const k=(n+h/60)%6;return 255*(1-Math.max(0,Math.min(k,4-k,1)))};return[f(5),f(3),f(1)]};
+  const SC=hc(st.sth),HC=hc(st.hih),ks=st.sts/100,kh=st.his/100,bl2=st
