@@ -44,11 +44,10 @@ jobs:
             rm -rf android/app/src/main/res/mipmap-anydpi-v26
           fi
 
-      - name: Evitar barra de status por cima dos botoes (Android 15+)
+      - name: Ajustar margens da barra de status (Android 15+)
         continue-on-error: true
         run: |
-          f=android/app/src/main/res/values/styles.xml
-          sed -i 's#<item name="windowNoTitle">true</item>#<item name="windowNoTitle">true</item>\n        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>#' "$f"
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('capacitor.config.json'));c.android=Object.assign({},c.android,{adjustMarginsForEdgeToEdge:'auto'});fs.writeFileSync('capacitor.config.json',JSON.stringify(c,null,2))"
 
       - name: Sincronizar app web
         run: npx cap sync android
