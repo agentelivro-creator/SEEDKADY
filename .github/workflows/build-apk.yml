@@ -23,7 +23,10 @@ jobs:
       - name: Preparar pasta www
         run: |
           mkdir -p www
-          [ -f www/index.html ] || cp index.html www/index.html
+          if [ -f index.html ]; then cp index.html www/index.html; fi
+          ls -la www
+          wc -c www/index.html
+          tail -c 120 www/index.html
 
       - name: Instalar dependencias
         run: npm install
