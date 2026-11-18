@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KADYSEED — Editor de Fotos Pro</title>
+<style>
+:root{--bg:#f2f2f6;--panel:#fff;--ink:#16161d;--mut:#6d6d7d;--line:#e2e2ea;--stage:#e7e7ee;--chip:#efeff5;--acc:#16a34a;--acc2:#0d9488;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c0d12;--panel:#15161d;--ink:#f1f1f6;--mut:#8b8b9c;--line:#262733;--stage:#0a0a0e;--chip:#1f2029}}
+:root[data-theme="dark"]{--bg:#0c0d12;--panel:#15161d;--ink:#f1f1f6;--mut:#8b8b9c;--line:#262733;--stage:#0a0a0e;--chip:#1f2029}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{margin-right:auto;line-height:1.15}.logo span{font-weight:800;font-size:17px;letter-spacing:-.3px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}.logo small{display:block;font-size:10px;color:var(--mut);letter-spacing:.2px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#16161d;color:#fff;padding:11px 18px;border-radius:24px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90%;text-align:center}.toast.on{opacity:1;transform:translate(-50%,0)}.credit{text-align:center;color:var(--mut);font-size:11px;margin-top:18px}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+.ib{border:1px solid var(--line);background:var(--chip);border-radius:10px;min-width:38px;height:38px;padding:0 10px;font-size:16px}
+.ib:disabled{opacity:.35}
+.pri{border:0;color:#fff;background:linear-gradient(90deg,var(--acc),var(--acc2));font-weight:700;border-radius:10px;height:38px;padding:0 16px}
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative;background:var(--stage);display:flex;align-items:center;justify-content:center;padding:10px}
+#cv{width:100%;height:100%;object-fit:contain;display:none;filter:drop-shadow(0 8px 30px rgba(0,0,0,.35))}
+#hist{position:absolute;right:14px;top:14px;width:110px;height:48px;border-radius:8px;background:rgba(0,0,0,.45);display:none;backdrop-filter:blur(6px)}
+#cmp{position:absolute;left:14px;bottom:14px;display:none;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:20px;padding:8px 14px;font-size:12px;font-weight:600;user-select:none;touch-action:none}
+.empty{text-align:center;max-width:320px;border:2px dashed var(--line);border-radius:20px;padding:32px 20px}
+.empty h2{margin:0 0 6px;font-size:20px}.empty p{color:var(--mut);margin:0 0 18px}
+.empty .ib{margin-top:8px}
+.panel{background:var(--panel);border-top:1px solid var(--line)}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:8px 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:0;background:transparent;color:var(--mut);padding:8px 14px;border-radius:20px;font-weight:600}
+.tab.on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff}
+.body{max-height:34vh;overflow-y:auto;padding:4px 16px 16px}
+.pg{display:none}.pg.on{display:block}
+.row{margin:10px 0}
+.row label{display:flex;justify-content:space-between;color:var(--mut);font-size:12px;font-weight:600;margin-bottom:2px}
+.row output{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--acc);height:28px}
+input[type=text],select{width:100%;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:0 12px;font:inherit}
+input[type=color]{width:100%;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--chip);padding:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:9px 13px;font-weight:600}
+.chip.on{border-color:var(--acc);color:var(--acc)}
+.flt{display:flex;flex-wrap:wrap;gap:12px 10px;padding:8px 0}
+.flt button{flex:none;width:74px;border:0;background:none;color:var(--mut);font-size:11px;font-weight:600;text-align:center;padding:0}
+.flt canvas{display:block;width:74px;height:74px;border-radius:12px;margin-bottom:4px;border:2px solid transparent}
+.flt button.on canvas{border-color:var(--acc)}.flt button.on{color:var(--ink)}
+.modal{position:fixed;inset:0;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px;z-index:9;text-align:center;color:#fff}
+.modal.on{display:flex}.modal img{max-width:100%;max-height:62vh;border-radius:12px}
+.modal a{text-decoration:none;display:inline-flex;align-items:center}
+body{background:radial-gradient(800px 420px at 90% -8%,color-mix(in srgb,var(--acc) 22%,transparent),transparent),radial-gradient(600px 400px at -10% 110%,color-mix(in srgb,var(--acc2) 16%,transparent),transparent),var(--bg)}
+header{background:color-mix(in srgb,var(--panel) 80%,transparent);backdrop-filter:blur(14px);position:relative;z-index:3}
+.panel{background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px)}
+.stage{touch-action:none;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--stage) 85%,var(--acc) 15%),var(--stage))}
+.pri{box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 40%,transparent);transition:transform .1s}.pri:active,.ib:active,.chip:active{transform:scale(.96)}
+.logo{display:flex;align-items:center;gap:9px}.logo span{display:block}.lg{width:36px;height:36px;border-radius:10px;object-fit:cover}
+.tab{min-width:0;font-size:13px;padding:9px 16px;border-radius:18px;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;height:26px}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:5px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;margin-top:-7.5px;background:#fff;border:3px solid var(--acc);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+input[type=range]::-moz-range-track{height:5px;border-radius:5px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--acc)}
+.zoom{position:absolute;right:14px;bottom:14px;display:none;gap:6px}.zoom button{border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:18px;min-width:38px;height:36px;font-weight:700;padding:0 10px}
+#cv{transform-origin:center;will-change:transform}
+@media (min-width:900px){
+ main{flex-direction:row}
+ .panel{width:360px;border-top:0;border-left:1px solid var(--line);display:flex;flex-direction:column;order:2}
+ .tabs{flex-wrap:wrap;overflow:visible}.body{max-height:none;flex:1}
+ .stage{padding:24px}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo"><img class="lg" alt=""><div><span>KADYSEED</span><small>desenvolvido por Josimar</small></div></div>
+ <button class="ib" id="undo" title="Desfazer" disabled>↶</button>
+ <button class="ib" id="redo" title="Refazer" disabled>↷</button>
+ <button class="ib" id="reset" title="Restaurar tudo" disabled>⟲</button>
+ <button class="ib" id="open" title="Abrir foto">＋</button>
+ <button class="pri" id="expTop">Salvar</button>
+</header>
+<main>
+ <div class="stage" id="stage">
+  <div class="empty" id="empty">
+   <img class="lg" alt="" style="width:88px;height:88px;border-radius:22px;margin-bottom:14px;box-shadow:0 10px 30px rgba(22,163,74,.4)"><h2>Edite como um profissional</h2>
+   <p>Arraste uma foto aqui ou escolha da galeria. Tudo é processado no seu aparelho.</p>
+   <button class="pri" id="open2">Abrir foto</button><br>
+   <button class="ib" id="demo">Usar foto de exemplo</button>
+   <p class="credit">desenvolvido por Josimar</p>
+  </div>
+  <canvas id="cv"></canvas><canvas id="hist" width="110" height="48"></canvas>
+  <button id="cmp">Segure para comparar</button><div class="zoom" id="zoom"><button id="zout">−</button><button id="zv">100%</button><button id="zin">+</button></div>
+ </div>
+ <section class="panel">
+  <div class="tabs" id="tabs"></div>
+  <div class="body" id="body"></div>
+ </section>
+</main>
+<div class="modal" id="modal">
+ <img id="mimg" alt="Foto exportada">
+ <div>Toque e segure a imagem para salvar, ou use o botão.</div>
+ <div style="display:flex;gap:10px"><a class="pri" id="mdl" href="#">Baixar</a><button class="ib" id="mx">Fechar</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file" accept="image/*" hidden>
+<script>
+window.addEventListener('error',e=>{try{toast('Erro: '+(e.message||e))}catch(_){}});
+window.addEventListener('unhandledrejection',e=>{try{toast('Erro: '+((e.reason&&e.reason.message)||e.reason))}catch(_){}});
+const $=q=>document.querySelector(q);
+const ADJ=['exp','bri','con','hil','sha','sat','vib','tem','tin','fade','vig','gra','shp','bw','sep','hue','blur','pix','pb','pw','gam','gr','gg','gb','sts','his','bal','cla','dz','soft','glow','chr'];
+const DEF={exp:0,bri:0,con:0,hil:0,sha:0,sat:0,vib:0,tem:0,tin:0,fade:0,vig:0,gra:0,shp:0,bw:0,sep:0,hue:0,blur:0,pix:0,pb:0,pw:0,gam:0,gr:0,gg:0,gb:0,sth:200,sts:0,hih:35,his:0,bal:0,cla:0,dz:0,soft:0,glow:0,chr:0,cz:100,cx:0,cy:0,rot:0,ang:0,fh:0,fv:0,crop:'',text:'',tfont:'system-ui',tsize:8,tcolor:'#ffffff',tx:50,ty:85,bor:0,bcol:'#ffffff'};
+const POS=['fade','vig','gra','shp','bw','sep','bor','blur','pix','pb','pw','sts','his','soft','glow','chr'];
+const G={Luz:[['exp','Exposição'],['bri','Brilho'],['con','Contraste'],['hil','Realces'],['sha','Sombras']],
+Cor:[['sat','Saturação'],['vib','Vibração'],['tem','Temperatura'],['tin','Matiz (verde/magenta)'],['hue','Tom (girar cores)']],
+Efeitos:[['fade','Esmaecer'],['vig','Vinheta'],['gra','Granulação'],['shp','Nitidez'],['bw','Preto e branco'],['sep','Sépia'],['blur','Desfoque'],['pix','Pixelizar']]};
+const PRE={Original:{},'Vívido':{sat:30,con:15,vib:25},Cinema:{con:20,tem:-15,tin:5,sha:15,vig:30,sat:-10,fade:10},'Teal & Orange':{con:22,sat:18,sth:195,sts:55,hih:28,his:45,vig:25,shp:20,cla:15},Blockbuster:{con:35,sat:10,tem:-10,hil:-25,sha:20,vig:35,shp:30,exp:-5},'Épico':{con:30,sat:20,vib:20,hil:-30,sha:25,shp:35,vig:25,tem:8},Thriller:{con:30,sat:-35,tem:-25,exp:-12,vig:45,gra:15,fade:8},'Filme 35mm':{gra:45,fade:20,tem:12,sat:-8,con:8,vig:20},'Ficção Científica':{tem:-40,tin:-10,con:25,sat:-5,vig:35,exp:-8,shp:20},Western:{sep:35,tem:35,con:20,fade:12,vig:40,gra:25,sat:10},'Anos 80':{tem:-10,tin:25,sat:35,fade:15,con:15,gra:20,bri:5},Vintage:{sep:40,fade:25,vig:35,gra:30,tem:20,con:-5},'P&B':{bw:100,con:20},Noir:{bw:100,con:50,vig:50,exp:-10,gra:20},Quente:{tem:35,sat:10},Frio:{tem:-35,sat:5},'Dramático':{con:40,hil:-30,sha:30,sat:-15,vig:25,shp:30},Suave:{con:-15,fade:20,bri:8,sat:-10},'Pôr do sol':{tem:40,tin:15,sat:25,vig:20},Matte:{fade:35,con:-10,sat:-15},Retrato:{sat:5,vib:15,con:8,sha:12,hil:-10,tem:6,fade:6,shp:12,vig:12},Paisagem:{vib:35,con:18,hil:-20,sha:20,shp:30,sat:12},Comida:{tem:14,sat:25,con:15,vib:20,shp:25,vig:10},Urbano:{con:30,sat:-20,tem:-8,shp:35,vig:20,gra:12},Neon:{sat:55,vib:30,con:25,tin:20,tem:-15,vig:20},Sonho:{bri:10,fade:20,con:-12,sat:15,tem:10,vig:10},'Alto contraste':{con:60,sat:20,shp:40},Pastel:{bri:12,con:-20,sat:-10,fade:25,vib:10,tem:5},Polaroid:{fade:28,tem:15,sat:-5,con:5,vig:30,gra:20,bri:6,tin:6}};
+const CL=['Vermelho','Amarelo','Verde','Ciano','Azul','Magenta'];
+CL.forEach((c,i)=>{ADJ.push('ms'+i,'ml'+i);DEF['ms'+i]=0;DEF['ml'+i]=0});
+Object.assign(G,{'Níveis':[['pb','Ponto preto'],['pw','Ponto branco'],['gam','Gama (meios-tons)'],['gr','Canal vermelho'],['gg','Canal verde'],['gb','Canal azul']],HSL:[...CL.map((c,i)=>['ms'+i,'Saturação · '+c]),...CL.map((c,i)=>['ml'+i,'Luminosidade · '+c])],Tons:[['sth','Sombras · matiz'],['sts','Sombras · intensidade'],['hih','Realces · matiz'],['his','Realces · intensidade'],['bal','Equilíbrio']],Retoque:[['cla','Clareza'],['dz','Remover névoa'],['soft','Suavizar pele'],['glow','Brilho suave'],['chr','Aberração cromática']]});
+const RNG={sth:[0,360],hih:[0,360]},mm=k=>RNG[k]||(POS.includes(k)?[0,100]:[-100,100]);
+let s={...DEF},src=null,hist=[],hi=-1,orig=false,pend=0;
+
+function rng(k,l,min,max){return `<div class="row"><label><span>${l}</span><output id="o_${k}">0</output></label><input type="range" data-k="${k}" min="${min}" max="${max}" value="0" step="1"></div>`}
+function build(){
+ const pages={};
+ for(const g in G)pages[g]=G[g].map(([k,l])=>rng(k,l,...mm(k))).join('');
+ pages.Luz='<button class="chip" id="auto" style="width:100%;margin-top:8px">Melhoria automática</button>'+pages.Luz;
+ pages.Filtros='<div class="flt" id="flt"></div><div class="row"><label><span>Intensidade do filtro</span><output id="o_fi">100</output></label><input type="range" id="fi" min="0" max="100" value="100"></div><div class="row" style="margin-top:18px"><label><span>Meus estilos</span></label><input type="text" id="cn" placeholder="Nome do estilo"></div><button class="chip" id="cs" style="width:100%">Salvar ajustes atuais como estilo</button><div class="flt" id="mine"></div>';
+ pages.Cortar=`<div class="chips" id="crops">${['','1:1','4:5','4:3','3:2','16:9','9:16'].map(c=>`<button class="chip" data-c="${c}">${c||'Livre'}</button>`).join('')}</div>
+ <div class="chips"><button class="chip" id="rl">⟲ 90°</button><button class="chip" id="rr">⟳ 90°</button><button class="chip" id="fh">⇋ Espelhar</button><button class="chip" id="fv">⇅ Inverter</button></div>${rng('ang','Endireitar (°)',-45,45)}${rng('cz','Zoom do recorte (%)',100,400)}${rng('cx','Mover recorte ←→',-100,100)}${rng('cy','Mover recorte ↑↓',-100,100)}`;
+ pages.Texto=`<div class="row"><input type="text" data-k="text" placeholder="Digite um texto na foto"></div><div class="row"><select data-k="tfont"><option value="system-ui">Moderna</option><option value="Georgia,serif">Elegante</option><option value="Impact,sans-serif">Impacto</option><option value="Courier New,monospace">Máquina de escrever</option><option value="Brush Script MT,cursive">Manuscrita</option></select></div>${rng('tsize','Tamanho',2,30)}${rng('tx','Posição horizontal',0,100)}${rng('ty','Posição vertical',0,100)}<div class="row"><label><span>Cor do texto</span></label><input type="color" data-k="tcolor" value="#ffffff"></div>
+ <div style="height:8px"></div>${rng('bor','Moldura',0,12)}<div class="row"><label><span>Cor da moldura</span></label><input type="color" data-k="bcol" value="#ffffff"></div>`;
+ pages.Exportar=`<div class="row"><label><span>Formato</span></label><select id="fmt"><option value="image/jpeg">JPEG</option><option value="image/png">PNG (sem perdas)</option><option value="image/webp">WebP</option></select></div>
+ <div class="row"><label><span>Tamanho</span></label><select id="esz"><option value="4096">Máximo (4096 px)</option><option value="2048" selected>Grande (2048 px)</option><option value="1080">Redes sociais (1080 px)</option></select></div><div class="row"><label><span>Qualidade</span><output id="o_q">92</output></label><input type="range" id="qual" min="40" max="100" value="92"></div><button class="pri" id="sv" style="width:100%;margin-top:8px">Salvar na galeria</button><button class="chip" id="exp" style="width:100%;margin-top:10px">Compartilhar / exportar arquivo</button><p class="credit">KADYSEED • desenvolvido por Josimar</p>`;
+ let t='',b='';
+ Object.keys(pages).forEach((n,i)=>{t+=`<button class="tab${i?'':' on'}" data-t="${n}">${n}</button>`;b+=`<div class="pg${i?'':' on'}" id="pg_${n}">${pages[n]}</div>`});
+ $('#tabs').innerHTML=t;$('#body').innerHTML=b;
+ $('#tabs').onclick=e=>{const tb=e.target.closest('.tab');if(!tb)return;const n=tb.dataset.t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===tb));document.querySelectorAll('.pg').forEach(x=>x.classList.toggle('on',x.id==='pg_'+n))};
+ document.querySelectorAll('[data-k]').forEach(el=>{
+  el.addEventListener('input',()=>{const k=el.dataset.k;s[k]=el.type==='range'?+el.value:el.value;const o=$('#o_'+k);if(o)o.textContent=el.value;draw()});
+  el.addEventListener('change',commit);
+  if(el.type==='range')el.addEventListener('dblclick',()=>{el.value=DEF[el.dataset.k];el.dispatchEvent(new Event('input'));commit()});
+ });
+ $('#qual').oninput=e=>$('#o_q').textContent=e.target.value;
+ $('#crops').onclick=e=>{const c=e.target.dataset.c;if(c===undefined)return;s.crop=c;sync();draw();commit()};
+ $('#rl').onclick=()=>{s.rot=(s.rot+3)%4;draw();commit()};
+ $('#rr').onclick=()=>{s.rot=(s.rot+1)%4;draw();commit()};
+ $('#fh').onclick=()=>{s.fh^=1;draw();commit()};
+ $('#fv').onclick=()=>{s.fv^=1;draw();commit()};
+ $('#exp').onclick=exportAny;$('#auto').onclick=autoFix;$('#cs').onclick=saveMine;$('#sv').onclick=()=>saveGallery();
+ let cur='Original';
+ $('#fi').oninput=e=>{$('#o_fi').textContent=e.target.value;applyPre(cur,e.target.value/100,false)};
+ $('#fi').onchange=commit;
+ window.applyPre=(n,f,c=true)=>{cur=n;ADJ.concat(['sth','hih']).forEach(k=>s[k]=(k=='sth'||k=='hih')?(PRE[n][k]==null?DEF[k]:PRE[n][k]):Math.round((PRE[n][k]||0)*f));sync();draw();if(c)commit();document.querySelectorAll('#flt button').forEach(x=>x.classList.toggle('on',x.dataset.n===n))};
+}
+function sync(){
+ document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;el.value=s[k];const o=$('#o_'+k);if(o)o.textContent=s[k]});
+ document.querySelectorAll('#crops .chip').forEach(c=>c.classList.toggle('on',c.dataset.c===s.crop));
+}
+function commit(){
+ hist=hist.slice(0,hi+1);const j=JSON.stringify(s);if(hist[hi]===j)return;hist.push(j);hi++;btns();
+}
+function btns(){$('#undo').disabled=hi<1;$('#redo').disabled=hi>=hist.length-1;$('#reset').disabled=!src}
+function go(i){hi=i;s=JSON.parse(hist[hi]);sync();draw();btns()}
+$('#undo').onclick=()=>hi>0&&go(hi-1);
+$('#redo').onclick=()=>hi<hist.length-1&&go(hi+1);
+$('#reset').onclick=()=>{s={...DEF};sync();draw();commit()};
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();e.shiftKey?$('#redo').click():$('#undo').click()}});
+
+function render(sc,max,st){
+ const q=st.rot%2;let w0=q?sc.height:sc.width,h0=q?sc.width:sc.height;
+ const k=Math.min(1,max/Math.max(w0,h0)),w=Math.round(w0*k),h=Math.round(h0*k);
+ let c=document.createElement('canvas');c.width=w;c.height=h;let x=c.getContext('2d');
+ const a=st.ang*Math.PI/180,z=Math.abs(Math.cos(a))+Math.abs(Math.sin(a))*Math.max(w/h,h/w);
+ x.imageSmoothingQuality='high';x.translate(w/2,h/2);x.rotate(a);x.scale(z*(st.fh?-1:1),z*(st.fv?-1:1));x.rotate(st.rot*Math.PI/2);
+ const dw=sc.width*k,dh=sc.height*k;x.drawImage(sc,-dw/2,-dh/2,dw,dh);
+ if(st.crop||st.cz>100){const[r1,r2]=(st.crop||w+':'+h).split(':').map(Number),R=r1/r2,zz=Math.max(1,st.cz/100);let cw=w,ch=h;if(w/h>R)cw=h*R;else ch=w/R;cw=Math.round(cw/zz);ch=Math.round(ch/zz);
+  const c2=document.createElement('canvas');c2.width=cw;c2.height=ch;c2.getContext('2d').drawImage(c,(w-cw)/2*(1+st.cx/100),(h-ch)/2*(1+st.cy/100),cw,ch,0,0,cw,ch);c=c2;x=c.getContext('2d')}
+ const W=c.width,H=c.height;
+ const dn=(f,sm)=>{const u=document.createElement('canvas');u.width=Math.max(2,W/f|0);u.height=Math.max(2,H/f|0);const ux=u.getContext('2d');ux.imageSmoothingQuality='high';ux.drawImage(c,0,0,u.width,u.height);x.imageSmoothingEnabled=sm;x.drawImage(u,0,0,W,H);x.imageSmoothingEnabled=true};
+ if(st.blur)dn(1+st.blur/6,true);
+ if(st.pix)dn(2+st.pix/100*Math.min(W,H)/10,false);
+ if(ADJ.some(k=>st[k])){
+  const im=x.getImageData(0,0,W,H),d=im.data,m=Math.pow(2,st.exp/100*1.5),br=st.bri*1.27,cf=1+st.con/100,tm=st.tem*.5,tn=st.tin,hl=st.hil*.4,sh=st.sha*.4,sv=1+st.sat/100,vb=st.vib/100,bw=st.bw/100,sp=st.sep/100,fd=st.fade/100*.3,vg=st.vig/100,gr=st.gra*1.2,hu=st.hue*1.8*Math.PI/180,cs=Math.cos(hu),sn=Math.sin(hu);
+  const hc=h=>{const f=n=>{const k=(n+h/60)%6;return 255*(1-Math.max(0,Math.min(k,4-k,1)))};return[f(5),f(3),f(1)]};
+  const SC=hc(st.sth),HC=hc(st.hih),ks=st.sts/100,kh=st.his/100,bl2=st.bal/100,tn2=ks||kh,dzv=st.dz*.4,dzk=1+st.dz/100*.35;
+  const MS=[0,1,2,3,4,5].map(i=>st['ms'+i]/100),ML=[0,1,2,3,4,5].map(i=>st['ml'+i]/100),hs=MS.some(v=>v)||ML.some(v=>v);
+  let LR,LG,LB;
+  if(st.pb||st.pw||st.gam||st.gr||st.gg||st.gb){const bp=st.pb*1.5,wp=255-st.pw*1.5,mk=gc=>{const e=Math.pow(2,-(st.gam+gc)/50),a=new Uint8ClampedArray(256);for(let i=0;i<256;i++)a[i]=255*Math.pow(Math.min(1,Math.max(0,(i-bp)/Math.max(1,wp-bp))),e);return a};LR=mk(st.gr);LG=mk(st.gg);LB=mk(st.gb)}
+  const bl=f=>{const u=document.createElement('canvas');u.width=W;u.height=H;const ux=u.getContext('2d');ux.imageSmoothingQuality='high';const v=document.createElement('canvas');v.width=Math.max(2,W/f|0);v.height=Math.max(2,H/f|0);v.getContext('2d').drawImage(c,0,0,v.width,v.height);ux.drawImage(v,0,0,W,H);return ux.getImageData(0,0,W,H).data};
+  const BC=(st.cla||st.glow)?bl(Math.max(4,Math.min(W,H)/40)):null,BS=st.soft?bl(Math.max(2,Math.min(W,H)/200)):null;
+  let p=0;
+  for(let y=0;y<H;y++){const dy=(y/H-.5)*2;
+   for(let xx=0;xx<W;xx++,p+=4){
+    let r=LR?LR[d[p]]:d[p],g=LR?LG[d[p+1]]:d[p+1],b=LR?LB[d[p+2]]:d[p+2];r=r*m+br;g=g*m+br;b=b*m+br;
+    r=(r-128)*cf+128;g=(g-128)*cf+128;b=(b-128)*cf+128;
+    if(dzv){r=(r-dzv)*dzk;g=(g-dzv)*dzk;b=(b-dzv)*dzk}
+    r+=tm+tn*.15;b+=-tm+tn*.15;g-=tn*.4;
+    let l=.299*r+.587*g+.114*b;
+    const wh=Math.min(1,Math.max(0,(l-128)/127)),ws=Math.min(1,Math.max(0,(128-l)/128)),ad=hl*wh+sh*ws;
+    r+=ad;g+=ad;b+=ad;l=.299*r+.587*g+.114*b;
+    const mx=Math.max(r,g,b),mn=Math.min(r,g,b),t=sv*(1+vb*(1-(mx-mn)/255));
+    r=l+(r-l)*t;g=l+(g-l)*t;b=l+(b-l)*t;
+    if(hs){const mx2=Math.max(r,g,b),dd=mx2-Math.min(r,g,b);if(dd>1){let H2;if(mx2===r)H2=((g-b)/dd+6)%6;else if(mx2===g)H2=(b-r)/dd+2;else H2=(r-g)/dd+4;let fs=1,fl=0;for(let i=0;i<6;i++){let ds=Math.abs(H2-i);if(ds>3)ds=6-ds;const w=Math.max(0,1-ds);if(w){fs+=w*MS[i];fl+=w*ML[i]}}const l2=.299*r+.587*g+.114*b,al=fl*(dd/255)*60;r=l2+(r-l2)*fs+al;g=l2+(g-l2)*fs+al;b=l2+(b-l2)*fs+al}}
+    if(tn2){const ll=(.299*r+.587*g+.114*b)/255,ws=Math.max(0,Math.min(1,1-ll*2+bl2)),wh=Math.max(0,Math.min(1,ll*2-1-bl2));r+=((SC[0]-128)*ws*ks+(HC[0]-128)*wh*kh)*.6;g+=((SC[1]-128)*ws*ks+(HC[1]-128)*wh*kh)*.6;b+=((SC[2]-128)*ws*ks+(HC[2]-128)*wh*kh)*.6}
+    if(hu){const Y=.299*r+.587*g+.114*b,I=.596*r-.274*g-.322*b,Q=.211*r-.523*g+.312*b,I2=I*cs-Q*sn,Q2=I*sn+Q*cs;r=Y+.956*I2+.621*Q2;g=Y-.272*I2-.647*Q2;b=Y-1.106*I2+1.703*Q2}
+    if(bw){r+=(l-r)*bw;g+=(l-g)*bw;b+=(l-b)*bw}
+    if(sp){const sr=.393*r+.769*g+.189*b,sg=.349*r+.686*g+.168*b,sb=.272*r+.534*g+.131*b;r+=(sr-r)*sp;g+=(sg-g)*sp;b+=(sb-b)*sp}
+    if(fd){r=r*(1-fd)+70*fd;g=g*(1-fd)+70*fd;b=b*(1-fd)+70*fd}
+    if(BC&&st.cla){const k=st.cla/100*.9;r+=(r-BC[p])*k;g+=(g-BC[p+1])*k;b+=(b-BC[p+2])*k}
+    if(BS){const k=st.soft/100,df=Math.abs(.299*(r-BS[p])+.587*(g-BS[p+1])+.114*(b-BS[p+2])),w=Math.max(0,1-df/35)*k;r+=(BS[p]-r)*w;g+=(BS[p+1]-g)*w;b+=(BS[p+2]-b)*w}
+    if(BC&&st.glow){const k=st.glow/100*1.2;r+=Math.max(0,BC[p]-110)*k;g+=Math.max(0,BC[p+1]-110)*k;b+=Math.max(0,BC[p+2]-110)*k}
+    if(vg){const dx=(xx/W-.5)*2,v=1-vg*((dx*dx+dy*dy)/2)*1.5;r*=v;g*=v;b*=v}
+    if(gr){const n=(Math.random()-.5)*gr;r+=n;g+=n;b+=n}
+    d[p]=r;d[p+1]=g;d[p+2]=b;
+   }}
+  if(st.chr){const o=new Uint8ClampedArray(d),sh=Math.max(1,Math.round(st.chr/100*W*.012));for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const i=(y*W+xx)*4;d[i]=o[(y*W+Math.min(W-1,xx+sh))*4];d[i+2]=o[(y*W+Math.max(0,xx-sh))*4+2]}}
+  if(st.shp){const o=new Uint8ClampedArray(d),a2=st.shp/100*1.2,s4=W*4;
+   for(let y=1;y<H-1;y++)for(let xx=1;xx<W-1;xx++){const i=(y*W+xx)*4;for(let ch=0;ch<3;ch++){const j=i+ch;d[j]=o[j]+a2*(4*o[j]-o[j-4]-o[j+4]-o[j-s4]-o[j+s4])}}}
+  x.putImageData(im,0,0);
+ }
+ if(st.text){const fs=st.tsize/100*H;x.font=`800 ${fs}px ${st.tfont||'system-ui'},sans-serif`;x.textAlign='center';x.textBaseline='middle';x.fillStyle=st.tcolor;x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=fs*.15;x.fillText(st.text,st.tx/100*W,st.ty/100*H);x.shadowBlur=0}
+ if(st.bor){const t=st.bor/100*Math.min(W,H);x.fillStyle=st.bcol;x.fillRect(0,0,W,t);x.fillRect(0,H-t,W,t);x.fillRect(0,0,t,H);x.fillRect(W-t,0,t,H)}
+ return c;
+}
+function draw(){if(pend)return;pend=requestAnimationFrame(()=>{pend=0;if(!src)return;
+ const st=orig?{...DEF,rot:s.rot,ang:s.ang,fh:s.fh,fv:s.fv,crop:s.crop}:s,p=render(src,1400,st),cv=$('#cv');
+ cv.width=p.width;cv.height=p.height;cv.getContext('2d').drawImage(p,0,0);histo(p)})}
+function histo(p){
+ const t=document.createElement('canvas');t.width=64;t.height=Math.max(1,Math.round(64*p.height/p.width));const tx=t.getContext('2d');tx.drawImage(p,0,0,t.width,t.height);
+ const d=tx.getImageData(0,0,t.width,t.height).data,B=[new Array(32).fill(0),new Array(32).fill(0),new Array(32).fill(0)];
+ for(let i=0;i<d.length;i+=4)for(let c=0;c<3;c++)B[c][d[i+c]>>3]++;
+ const mx=Math.max(...B.flat()),h=$('#hist').getContext('2d');h.clearRect(0,0,110,48);h.globalCompositeOperation='lighter';
+ ['#ff3b3b','#3bff6a','#3b7bff'].forEach((col,c)=>{h.fillStyle=col+'aa';B[c].forEach((v,i)=>{const bh=v/mx*46;h.fillRect(i*3.4,48-bh,3.4,bh)})});
+}
+function setSrc(img){
+ const k=Math.min(1,4000/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+ src=c;Z=1;zapply();s={...DEF};hist=[];hi=-1;sync();commit();
+ $('#empty').style.display='none';['#cv','#hist','#cmp','#zoom'].forEach(q=>$(q).style.display=q==='#zoom'?'flex':'block');
+ const f=$('#flt');f.innerHTML='';
+ for(const n in PRE){const b=document.createElement('button');b.dataset.n=n;const t=render(c,90,{...DEF,...PRE[n],crop:'1:1'});b.appendChild(t);b.append(n);b.onclick=()=>{$('#fi').value=100;$('#o_fi').textContent=100;applyPre(n,1)};f.appendChild(b)}
+ f.firstChild.classList.add('on');renderMine();draw();btns();
+}
+function loadFile(f){
+ if(!f)return;
+ if(f.type&&!f.type.startsWith('image/')){toast('Esse arquivo não é uma imagem');return}
+ const u=URL.createObjectURL(f),i=new Image();
+ i.onload=()=>{try{setSrc(i)}catch(e){toast('Erro ao abrir a foto: '+e.message)}URL.revokeObjectURL(u)};
+ i.onerror=()=>{URL.revokeObjectURL(u);toast('Não foi possível abrir essa imagem')};
+ i.src=u;
+}
+$('#file').onchange=e=>{loadFile(e.target.files[0]);e.target.value=''};
+['#open','#open2'].forEach(q=>$(q).onclick=()=>$('#file').click());
+$('#stage').ondragover=e=>e.preventDefault();
+$('#stage').ondrop=e=>{e.preventDefault();loadFile(e.dataTransfer.files[0])};
+$('#demo').onclick=()=>{
+ const c=document.createElement('canvas');c.width=1200;c.height=800;const x=c.getContext('2d');
+ let g=x.createLinearGradient(0,0,0,800);g.addColorStop(0,'#1c2b5a');g.addColorStop(.5,'#e8734a');g.addColorStop(.7,'#ffc46b');g.addColorStop(1,'#2a3a5c');x.fillStyle=g;x.fillRect(0,0,1200,800);
+ x.fillStyle='#fff3c4';x.beginPath();x.arc(820,430,70,0,7);x.fill();
+ [['#3b2a48',.55,90],['#241a35',.65,140],['#150f22',.75,60]].forEach(([col,yy,a],i)=>{x.fillStyle=col;x.beginPath();x.moveTo(0,800);for(let X=0;X<=1200;X+=40)x.lineTo(X,800*yy+Math.sin(X/130+i*2)*a);x.lineTo(1200,800);x.fill()});
+ const i=new Image();i.onload=()=>setSrc(i);i.src=c.toDataURL();
+};
+const cm=$('#cmp');['pointerdown'].forEach(v=>cm.addEventListener(v,e=>{orig=true;draw()}));
+['pointerup','pointerleave','pointercancel'].forEach(v=>cm.addEventListener(v,()=>{if(orig){orig=false;draw()}}));
+const cap=()=>{try{return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){return false}};
+const PL={};
+function plug(n){if(n in PL)return PL[n];let p=null;try{const C=window.Capacitor;if(C)p=(C.Plugins&&C.Plugins[n])||(C.registerPlugin?C.registerPlugin(n):null)}catch(e){}PL[n]=p;return p}
+const extOf=f=>f==='image/jpeg'?'jpg':f==='image/webp'?'webp':'png';
+const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,30)));
+const outCanvas=()=>render(src,+$('#esz').value,s);
+function exportImg(){
+ if(!src)return;
+ const f=$('#fmt').value;let c;
+ try{c=outCanvas()}catch(e){toast('Erro ao gerar a imagem: '+e.message);return}
+ c.toBlob(b=>{
+  if(!b){toast('Não foi possível gerar o arquivo. Escolha um tamanho menor.');return}
+  const u=URL.createObjectURL(b);$('#mimg').src=u;const a=$('#mdl');a.href=u;a.download='foto-editada.'+extOf(b.type||f);$('#modal').classList.add('on')
+ },f,$('#qual').value/100);
+}
+async function shareNative(url,name){
+ const FS=plug('Filesystem'),SH=plug('Share');
+ if(!FS||!SH)return false;
+ try{
+  const r=await FS.writeFile({path:name,data:url.split(',')[1],directory:'CACHE'});
+  await SH.share({title:'KADYSEED',files:[r.uri],dialogTitle:'Salvar ou compartilhar'});
+  return true;
+ }catch(e){const m=String((e&&(e.message||e.code))||e);if(/cancel/i.test(m))return true;toast('Compartilhar falhou: '+m);return false}
+}
+async function exportAny(){
+ if(!src){toast('Abra uma foto primeiro');return}
+ if(!cap()){exportImg();return}
+ toast('Gerando imagem…');await nextFrame();
+ let url;try{url=outCanvas().toDataURL($('#fmt').value,$('#qual').value/100)}catch(e){toast('Erro ao gerar a imagem: '+e.message);return}
+ const mime=url.slice(5,url.indexOf(';'));
+ if(!(await shareNative(url,'kadyseed-'+Date.now()+'.'+extOf(mime))))exportImg();
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2800)}
+async function saveGallery(){
+ if(!src){$('#file').click();return}
+ if(!cap()){exportImg();return}
+ toast('Gerando imagem…');await nextFrame();
+ let url;try{url=outCanvas().toDataURL($('#fmt').value,$('#qual').value/100)}catch(e){toast('Erro ao gerar a imagem: '+e.message);return}
+ const mime=url.slice(5,url.indexOf(';')),name='kadyseed-'+Date.now(),M=plug('Media');
+ if(M){
+  try{
+   const find=async()=>((await M.getAlbums()).albums||[]).find(a=>a.name==='KADYSEED');
+   let al=await find();
+   if(!al){await M.createAlbum({name:'KADYSEED'});al=await find()}
+   const o={path:url,fileName:name};if(al)o.albumIdentifier=al.identifier;
+   await M.savePhoto(o);toast('Foto salva na galeria (álbum KADYSEED)!');return;
+  }catch(e){console.log('Media falhou',e)}
+ }
+ toast('Escolha onde salvar a foto');
+ if(!(await shareNative(url,name+'.'+extOf(mime))))exportImg();
+}
+$('#expTop').onclick=()=>saveGallery();
+$('#mx').onclick=()=>$('#modal').classList.remove('on');
+const IC={Luz:'☀️',Cor:'🎨',Efeitos:'✨',Filtros:'🎞️',Cortar:'✂️',Texto:'Aa',Exportar:'⤓'};
+const ICON="data:image/jpeg;base64,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";document.querySelectorAll('.lg').forEach(i=>i.src=ICON);
+function autoFix(){if(!src)return;const t=document.createElement('canvas');t.width=64;t.height=Math.max(1,Math.round(64*src.height/src.width));const x=t.getContext('2d');x.drawImage(src,0,0,t.width,t.height);const d=x.getImageData(0,0,t.width,t.height).data,h=new Array(256).fill(0);let n=0;for(let i=0;i<d.length;i+=4){h[Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2])]++;n++}
+ let a=0,lo=0,hi=255;for(let i=0;i<256;i++){a+=h[i];if(a>=n*.02){lo=i;break}}a=0;for(let i=255;i>=0;i--){a+=h[i];if(a>=n*.02){hi=i;break}}
+ const cl=(v,m,M)=>Math.round(Math.max(m,Math.min(M,v)));s.con=cl((255/Math.max(40,hi-lo)-1)*60,0,40);s.bri=cl((128-(lo+hi)/2)*.35,-30,30);s.vib=Math.max(s.vib,18);s.shp=Math.max(s.shp,15);sync();draw();commit();toast('Melhoria automática aplicada')}
+let Z=1,PX=0,PY=0,pd=0;const ptr=new Map(),cvE=$('#cv'),stg=$('#stage');
+function zapply(){if(Z<=1){PX=PY=0}cvE.style.transform=`translate(${PX}px,${PY}px) scale(${Z})`;$('#zv').textContent=Math.round(Z*100)+'%'}
+function zset(z){Z=Math.min(6,Math.max(1,z));zapply()}
+$('#zin').onclick=()=>zset(Z*1.4);$('#zout').onclick=()=>zset(Z/1.4);$('#zv').onclick=()=>zset(1);
+stg.addEventListener('wheel',e=>{if(!src)return;e.preventDefault();zset(Z*(e.deltaY<0?1.12:.89))},{passive:false});
+stg.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;ptr.set(e.pointerId,[e.clientX,e.clientY]);pd=0});
+stg.addEventListener('pointermove',e=>{if(!ptr.has(e.pointerId))return;const o=ptr.get(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);
+ if(ptr.size===2){const[a,b]=[...ptr.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)zset(Z*d/pd);pd=d}else if(Z>1){PX+=e.clientX-o[0];PY+=e.clientY-o[1];zapply()}});
+['pointerup','pointercancel','pointerleave'].forEach(v=>stg.addEventListener(v,e=>{ptr.delete(e.pointerId);pd=0}));
+let MY={};try{MY=JSON.parse(localStorage.getItem('ks_my')||'{}')}catch(e){}
+function renderMine(){const f=$('#mine');if(!f||!src)return;f.innerHTML='';for(const n in MY){const b=document.createElement('button');b.appendChild(render(src,90,{...DEF,...MY[n],crop:'1:1'}));b.append(n);b.onclick=()=>{ADJ.forEach(k=>s[k]=MY[n][k]||0);['sth','hih'].forEach(k=>s[k]=MY[n][k]==null?DEF[k]:MY[n][k]);sync();draw();commit()};f.appendChild(b)}}
+function saveMine(){const n=($('#cn').value||'').trim();if(!src||!n)return toast('Abra uma foto e digite um nome para o estilo');const o={};ADJ.concat(['sth','hih']).forEach(k=>{if(s[k]!==DEF[k])o[k]=s[k]});MY[n]=o;try{localStorage.setItem('ks_my',JSON.stringify(MY))}catch(e){}$('#cn').value='';renderMine();toast('Estilo salvo!')}
+build();
+</script>
+</body>
+</html>
