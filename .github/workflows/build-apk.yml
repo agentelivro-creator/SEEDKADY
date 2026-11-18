@@ -1,8 +1,8 @@
-name: Gerar APK KADYSEED
+name: Gerar APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -13,49 +13,53 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
-
-      - name: Preparar pasta www
-        run: |
-          mkdir -p www
-          if [ -f index.html ]; then cp index.html www/index.html; fi
-          ls -la www
-          wc -c www/index.html
-          tail -c 120 www/index.html
+          java-version: 21
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm install --legacy-peer-deps
+
+      - name: Preparar app web
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
 
       - name: Criar projeto Android
         run: npx cap add android
 
-      - name: Gerar icones do app
+      - name: Icone do app
+        continue-on-error: true
         run: |
-          mkdir -p assets
-          cp icon-only.png icon-foreground.png icon-background.png assets/
-          npm install --no-save @capacitor/assets@3
-          npx capacitor-assets generate --android
+          if [ -f icon.png ]; then
+            for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+              n=${d%%:*}; s=${d##*:}
+              mkdir -p android/app/src/main/res/mipmap-$n
+              convert icon.png -resize ${s}x${s} android/app/src/main/res/mipmap-$n/ic_launcher.png
+              cp android/app/src/main/res/mipmap-$n/ic_launcher.png android/app/src/main/res/mipmap-$n/ic_launcher_round.png
+            done
+            rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          fi
 
-      - name: Permissoes de galeria
+      - name: Evitar barra de status por cima dos botoes (Android 15+)
+        continue-on-error: true
         run: |
-          sed -i 's#</manifest>#<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/><uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/><uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28"/></manifest>#' android/app/src/main/AndroidManifest.xml
+          f=android/app/src/main/res/values/styles.xml
+          sed -i 's#<item name="windowNoTitle">true</item>#<item name="windowNoTitle">true</item>\n        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>#' "$f"
 
-      - name: Sincronizar
+      - name: Sincronizar app web
         run: npx cap sync android
 
       - name: Compilar APK
+        working-directory: android
         run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
-      - name: Enviar APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: KADYSEED-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
